@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<title>Smart Recipe Finder</title>
+
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+</head>
+
+<body>
+
+<button class="toggle" onclick="toggleMode()">🌙 Toggle Mode</button>
+
+<div class="container">
+
+<h1>🍳 Smart Recipe Finder</h1>
+
+<form method="POST" class="search">
+
+<input type="text" name="query" placeholder="Search recipes..." required>
+
+<select name="search_type">
+
+<option value="name">Search by Dish</option>
+<option value="ingredient">Search by Ingredient</option>
+
+</select>
+
+<select name="category">
+
+<option value="all">All Categories</option>
+
+{% for c in categories %}
+
+<option value="{{c.strCategory}}">
+{{c.strCategory}}
+</option>
+{% endfor %}
+
+</select>
+
+<button type="submit">Search</button>
+
+</form>
+
+<a href="/favorites" class="favlink">❤️ View Favorites</a>
+
+<h2>👨‍🍳 Chef Suggestion</h2>
+
+<div class="recipes">
+
+{% for r in suggestion %}
+
+<div class="card">
+
+<img src="{{ r.strMealThumb }}">
+
+<h3>{{ r.strMeal }}</h3>
+
+<button onclick="openModal('{{ r.strMeal }}','{{ r.strMealThumb }}','{{ r.strInstructions }}','{{ r.strYoutube }}')">
+Show Recipe
+</button>
+
+</div>
+
+{% endfor %}
+
+</div>
+
+<h2>🍽 Recipes</h2>
+
+<div class="recipes">
+
+{% for r in recipes %}
+
+<div class="card">
+
+<img src="{{ r.strMealThumb }}">
+
+<h3>{{ r.strMeal }}</h3>
+
+<div class="rating">
+⭐ ⭐ ⭐ ⭐ ⭐
+</div>
+
+<button onclick="openModal('{{ r.strMeal }}','{{ r.strMealThumb }}','{{ r.strInstructions }}','{{ r.strYoutube }}')">
+View Details
+</button>
+
+<form action="/favorite" method="POST">
+
+<input type="hidden" name="name" value="{{ r.strMeal }}">
+<input type="hidden" name="image" value="{{ r.strMealThumb }}">
+
+<button class="favbtn">❤️ Add Favorite</button>
+
+</form>
+
+</div>
+
+{% endfor %}
+
+</div>
+
+</div>
+
+<!-- RECIPE MODAL -->
+
+<div id="modal" class="modal">
+
+<div class="modal-content">
+
+<span class="close" onclick="closeModal()">×</span>
+
+<h2 id="title"></h2>
+
+<img id="img" style="width:200px; margin:10px;">
+
+<p id="instructions" style="max-height:200px; overflow:auto;"></p>
+
+<br>
+
+<a id="video" target="_blank">🎥 Watch Recipe Video</a>
+
+</div>
+
+</div>
+
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+
+</body>
+
+</html>
