@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>N-Queens Interactive</title>
+
+<style>
+body {
+    font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #1f1c2c, #928dab);
+    color: white;
+    text-align: center;
+    padding: 20px;
+}
+
+h1 {
+    font-size: 32px;
+}
+
+input {
+    padding: 8px;
+    border-radius: 6px;
+    border: none;
+}
+
+button {
+    padding: 8px 15px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    margin: 5px;
+    font-weight: bold;
+}
+
+.start-btn {
+    background: #00c6ff;
+    color: black;
+}
+
+.control-btn {
+    background: linear-gradient(45deg, #ff512f, #dd2476);
+    color: white;
+}
+
+.board {
+    display: grid;
+    gap: 4px;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.cell {
+    width: 60px;
+    height: 60px;
+    font-size: 26px;
+    border: none;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.white { background: #f0d9b5; }
+.black { background: #b58863; }
+
+.cell:hover {
+    transform: scale(1.1);
+}
+
+.message {
+    margin-top: 15px;
+    font-size: 20px;
+}
+</style>
+</head>
+
+<body>
+
+<h1>♛ N-Queens Interactive Game ♛</h1>
+
+{% if not n %}
+<form method="POST">
+    <input type="number" name="n" placeholder="Enter N (4-10)" min="4" max="10" required>
+    <button name="start" class="start-btn">Start Game</button>
+</form>
+{% endif %}
+
+{% if n %}
+<div class="board" style="grid-template-columns: repeat({{ n }}, 60px);">
+
+    {% for row in range(n) %}
+        {% for col in range(n) %}
+            {% set color = 'white' if (row+col)%2==0 else 'black' %}
+
+            <form method="POST">
+                <input type="hidden" name="row" value="{{ row }}">
+                <input type="hidden" name="col" value="{{ col }}">
+                <button name="place" class="cell {{ color }}">
+                    {% if board[row] == col %}
+                        ♛
+                    {% elif (row, col) in blocked %}
+                        ❌
+                    {% endif %}
+                </button>
+            </form>
+
+        {% endfor %}
+    {% endfor %}
+
+</div>
+
+<div class="message">
+    {{ message }}
+</div>
+
+{% if recommendation %}
+<div class="message">
+    🤖 Recommended: Place at Row {{ recommendation[0] }}, Column {{ recommendation[1] }}
+</div>
+{% endif %}
+
+<form method="POST">
+    <button name="restart" class="control-btn">Restart</button>
+    <button name="quit" class="control-btn">Quit</button>
+</form>
+
+{% endif %}
+
+</body>
+</html>
