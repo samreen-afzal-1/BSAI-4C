@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Animal Herd Detection</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+</head>
+<body>
+
+<h1>Upload Video for Herd Detection</h1>
+
+<form action="/upload" method="post" enctype="multipart/form-data">
+    <input type="file" name="video" accept="video/*" required>
+    <button type="submit">Upload & Detect</button>
+</form>
+
+<br><br>
+
+<img id="videoFeed" width="800">
+
+<div id="map"></div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script>
+var map = L.map('map').setView([30.3753, 69.3451], 5);
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png')
+.addTo(map);
+
+var marker;
+
+// Auto update alerts
+setInterval(function(){
+    fetch('/alerts')
+    .then(response => response.json())
+    .then(data => {
+        if(data.type){
+
+            if(marker) map.removeLayer(marker);
+
+            var colorIcon = data.type === "Danger Detected"
+                ? "http://maps.google.com/mapfiles/ms/icons/red-dot.png"
+                : "http://maps.google.com/mapfiles/ms/icons/green-dot.png";
+
+            var icon = L.icon({
+                iconUrl: colorIcon,
+                iconSize: [32,32]
+            });
+
+            marker = L.marker([data.lat, data.lon], {icon: icon})
+                .addTo(map)
+                .bindPopup(data.type)
+                .openPopup();
+        }
+    });
+}, 5000);
+</script>
+
+</body>
+</html>
