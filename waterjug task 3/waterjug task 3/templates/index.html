@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Water Jug AI Game</title>
+<style>
+body {
+    font-family: Arial;
+    background: linear-gradient(135deg,#141e30,#243b55);
+    color: white;
+    text-align: center;
+}
+
+.jugs {
+    display: flex;
+    justify-content: center;
+    gap: 60px;
+    margin: 30px;
+}
+
+.jug {
+    width: 120px;
+    height: 250px;
+    border: 4px solid white;
+    border-radius: 12px;
+    position: relative;
+    background: rgba(255,255,255,0.1);
+}
+
+.water {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    background: linear-gradient(to top,#00c6ff,#0072ff);
+    border-radius: 8px;
+}
+
+button {
+    padding: 10px 15px;
+    margin: 6px;
+    border: none;
+    border-radius: 8px;
+    background: #ff4e50;
+    color: white;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #fc913a;
+}
+
+.sidebar {
+    margin-top: 20px;
+    padding: 15px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 12px;
+    width: 350px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.win {
+    font-size: 22px;
+    color: #00ffcc;
+    margin-top: 15px;
+}
+</style>
+</head>
+<body>
+
+<h1>💧 Water Jug AI Interactive Game</h1>
+
+{% if not cap1 %}
+<form method="POST">
+    <input type="number" name="cap1" placeholder="Capacity Jug1" required>
+    <input type="number" name="cap2" placeholder="Capacity Jug2" required>
+    <input type="number" name="goal" placeholder="Goal Amount" required>
+    <br><br>
+    <button name="start">Start Game</button>
+</form>
+{% else %}
+
+<h3>🎯 Goal: {{ goal }} | 🧮 Steps: {{ steps }}</h3>
+
+<div class="jugs">
+    <div>
+        <div class="jug">
+            <div class="water" style="height: {{ (jug1/cap1)*100 }}%"></div>
+        </div>
+        <p>{{ jug1 }} / {{ cap1 }}</p>
+    </div>
+
+    <div>
+        <div class="jug">
+            <div class="water" style="height: {{ (jug2/cap2)*100 }}%"></div>
+        </div>
+        <p>{{ jug2 }} / {{ cap2 }}</p>
+    </div>
+</div>
+
+<form method="POST">
+    <button name="move" value="fill1">Fill Jug1</button>
+    <button name="move" value="fill2">Fill Jug2</button>
+    <button name="move" value="empty1">Empty Jug1</button>
+    <button name="move" value="empty2">Empty Jug2</button>
+    <button name="move" value="pour12">Pour 1 → 2</button>
+    <button name="move" value="pour21">Pour 2 → 1</button>
+    <br>
+    <button name="reset">🔄 Reset Game</button>
+</form>
+
+<div class="sidebar">
+    <h3>🔮 AI Recommendation:</h3>
+    <p>{{ recommendation }}</p>
+</div>
+
+{% if goal_reached %}
+<div class="win">
+    🎉 Congratulations! Goal Achieved!
+</div>
+{% endif %}
+
+{% endif %}
+
+</body>
+</html>
