@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Library Assistant Bot</title>
+  <style>
+    /* ── Reset & base ─────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #f0f4f8;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* ── Header ────────────────────────────────────────────────────── */
+    header {
+      width: 100%;
+      background: linear-gradient(135deg, #1a3c5e 0%, #2d6a9f 100%);
+      color: #fff;
+      padding: 22px 32px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      box-shadow: 0 3px 12px rgba(0,0,0,.25);
+    }
+    header .logo { font-size: 2rem; }
+    header h1    { font-size: 1.55rem; font-weight: 700; }
+    header p     { font-size: .88rem; opacity: .8; margin-top: 2px; }
+
+    /* ── Layout ─────────────────────────────────────────────────────── */
+    main {
+      width: 100%;
+      max-width: 820px;
+      padding: 28px 20px 60px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* ── Suggestion pills ──────────────────────────────────────────── */
+    .suggestions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .pill {
+      background: #fff;
+      border: 1.5px solid #2d6a9f;
+      color: #2d6a9f;
+      border-radius: 20px;
+      padding: 6px 16px;
+      font-size: .82rem;
+      cursor: pointer;
+      transition: background .18s, color .18s;
+    }
+    .pill:hover { background: #2d6a9f; color: #fff; }
+
+    /* ── Chat window ────────────────────────────────────────────────── */
+    #chat {
+      background: #fff;
+      border-radius: 14px;
+      box-shadow: 0 2px 12px rgba(0,0,0,.1);
+      padding: 20px;
+      min-height: 340px;
+      max-height: 520px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .msg {
+      display: flex;
+      flex-direction: column;
+      max-width: 78%;
+      gap: 4px;
+    }
+    .msg.user  { align-self: flex-end; align-items: flex-end; }
+    .msg.bot   { align-self: flex-start; align-items: flex-start; }
+
+    .bubble {
+      padding: 11px 16px;
+      border-radius: 16px;
+      font-size: .93rem;
+      line-height: 1.55;
+    }
+    .msg.user .bubble {
+      background: #2d6a9f;
+      color: #fff;
+      border-bottom-right-radius: 4px;
+    }
+    .msg.bot .bubble {
+      background: #eef4fb;
+      color: #1c2f40;
+      border-bottom-left-radius: 4px;
+    }
+    .msg.bot .bubble.fallback {
+      background: #fff7e6;
+      border-left: 4px solid #f0a500;
+    }
+
+    .label {
+      font-size: .74rem;
+      color: #88a0b8;
+      padding: 0 4px;
+    }
+
+    /* ── Similar matches accordion ──────────────────────────────────── */
+    .matches-toggle {
+      font-size: .78rem;
+      color: #2d6a9f;
+      cursor: pointer;
+      text-decoration: underline;
+      margin-top: 2px;
+    }
+    .matches-list {
+      display: none;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 6px;
+    }
+    .matches-list.open { display: flex; }
+    .match-item {
+      background: #f7fafd;
+      border: 1px solid #d0e0ef;
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: .82rem;
+      color: #2a4a62;
+    }
+    .match-item span { color: #88a0b8; font-size: .75rem; }
+
+    /* ── Typing indicator ────────────────────────────────────────────── */
+    .typing .bubble {
+      display: flex;
+      gap: 5px;
+      align-items: center;
+      padding: 14px 18px;
+    }
+    .dot {
+      width: 8px; height: 8px;
+      background: #2d6a9f;
+      border-radius: 50%;
+      animation: bounce .9s infinite;
+    }
+    .dot:nth-child(2) { animation-delay: .18s; }
+    .dot:nth-child(3) { animation-delay: .36s; }
+    @keyframes bounce {
+      0%, 80%, 100% { transform: translateY(0); }
+      40%           { transform: translateY(-6px); }
+    }
+
+    /* ── Input bar ───────────────────────────────────────────────────── */
+    .input-bar {
+      display: flex;
+      gap: 10px;
+      background: #fff;
+      border-radius: 50px;
+      box-shadow: 0 2px 10px rgba(0,0,0,.1);
+      padding: 8px 8px 8px 20px;
+    }
+    #query {
+      flex: 1;
+      border: none;
+      outline: none;
+      font-size: .95rem;
+      background: transparent;
+      color: #1c2f40;
+    }
+    #query::placeholder { color: #aabcce; }
+    #sendBtn {
+      background: #2d6a9f;
+      color: #fff;
+      border: none;
+      border-radius: 50px;
+      padding: 10px 22px;
+      font-size: .9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .18s;
+    }
+    #sendBtn:hover   { background: #1a3c5e; }
+    #sendBtn:disabled{ background: #90b4d0; cursor: not-allowed; }
+
+    /* ── Welcome card ────────────────────────────────────────────────── */
+    .welcome {
+      text-align: center;
+      padding: 30px 10px;
+      color: #6b8aa5;
+    }
+    .welcome .icon { font-size: 2.8rem; }
+    .welcome p { margin-top: 8px; font-size: .9rem; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">📚</div>
+  <div>
+    <h1>Library Assistant Bot</h1>
+    <p>Powered by MiniLM + FAISS semantic search</p>
+  </div>
+</header>
+
+<main>
+
+  <!-- Suggestion pills -->
+  <div class="suggestions">
+    <span class="pill" onclick="fillQuery('What are the opening hours?')">🕐 Opening hours</span>
+    <span class="pill" onclick="fillQuery('Is The Adventures of Chronicles available?')">🔍 Book availability</span>
+    <span class="pill" onclick="fillQuery('What Fiction books are available?')">📖 Fiction books</span>
+    <span class="pill" onclick="fillQuery('How many days can I borrow a book?')">📅 Borrowing policy</span>
+    <span class="pill" onclick="fillQuery('What is the fine for late return?')">💸 Late fine</span>
+    <span class="pill" onclick="fillQuery('Where can I find The Dream of Shadows?')">📍 Find a book</span>
+  </div>
+
+  <!-- Chat window -->
+  <div id="chat">
+    <div class="welcome">
+      <div class="icon">🤖</div>
+      <p>Hello! I can help you find books, check availability, locations, and library policies.<br>
+         Ask me anything or pick a suggestion above.</p>
+    </div>
+  </div>
+
+  <!-- Input bar -->
+  <div class="input-bar">
+    <input id="query" type="text" placeholder="Ask about a book, availability, hours …" autocomplete="off"/>
+    <button id="sendBtn" onclick="sendQuery()">Send</button>
+  </div>
+
+</main>
+
+<script>
+  const chat    = document.getElementById("chat");
+  const input   = document.getElementById("query");
+  const sendBtn = document.getElementById("sendBtn");
+
+  input.addEventListener("keydown", e => { if (e.key === "Enter") sendQuery(); });
+
+  function fillQuery(text) {
+    input.value = text;
+    input.focus();
+  }
+
+  function appendMsg(role, html, extra = "") {
+    const div = document.createElement("div");
+    div.className = `msg ${role}`;
+    div.innerHTML = `
+      <span class="label">${role === "user" ? "You" : "Library Bot"}</span>
+      <div class="bubble ${extra}">${html}</div>
+    `;
+    chat.appendChild(div);
+    chat.scrollTop = chat.scrollHeight;
+    return div;
+  }
+
+  function showTyping() {
+    const div = document.createElement("div");
+    div.className = "msg bot typing";
+    div.innerHTML = `
+      <span class="label">Library Bot</span>
+      <div class="bubble">
+        <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+      </div>`;
+    chat.appendChild(div);
+    chat.scrollTop = chat.scrollHeight;
+    return div;
+  }
+
+  function renderMatches(matches, container) {
+    if (!matches || matches.length <= 1) return;
+    const toggle = document.createElement("div");
+    toggle.className = "matches-toggle";
+    toggle.textContent = `▸ Show ${matches.length - 1} similar results`;
+
+    const list = document.createElement("div");
+    list.className = "matches-list";
+
+    matches.slice(1).forEach(m => {
+      const item = document.createElement("div");
+      item.className = "match-item";
+      item.innerHTML = `<strong>Q:</strong> ${m.question}<br>${m.answer}<br>
+        <span>Distance: ${m.distance.toFixed(3)}</span>`;
+      list.appendChild(item);
+    });
+
+    toggle.onclick = () => {
+      list.classList.toggle("open");
+      toggle.textContent = list.classList.contains("open")
+        ? `▾ Hide similar results`
+        : `▸ Show ${matches.length - 1} similar results`;
+    };
+
+    container.appendChild(toggle);
+    container.appendChild(list);
+  }
+
+  async function sendQuery() {
+    const query = input.value.trim();
+    if (!query) return;
+
+    input.value = "";
+    sendBtn.disabled = true;
+
+    // Remove welcome card if present
+    const welcome = chat.querySelector(".welcome");
+    if (welcome) welcome.remove();
+
+    appendMsg("user", escapeHtml(query));
+    const typingEl = showTyping();
+
+    try {
+      const res  = await fetch("/ask", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query })
+      });
+      const data = await res.json();
+
+      typingEl.remove();
+
+      const isFallback = data.answer && data.answer.startsWith("I'm not sure");
+      const msgDiv = appendMsg("bot", escapeHtml(data.answer), isFallback ? "fallback" : "");
+
+      // Attach similar matches accordion
+      renderMatches(data.matches, msgDiv);
+
+    } catch (err) {
+      typingEl.remove();
+      appendMsg("bot", "⚠️ Network error. Please try again.", "fallback");
+    }
+
+    sendBtn.disabled = false;
+    input.focus();
+  }
+
+  function escapeHtml(str) {
+    return str.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\n/g,"<br>");
+  }
+</script>
+</body>
+</html>
