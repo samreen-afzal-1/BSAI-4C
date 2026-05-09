@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NLP Base Project</title>
+  <link rel="stylesheet" href="static/style.css" />
+</head>
+<body>
+  <div class="app">
+    <div class="header">
+      <h1>NLP Base Project</h1>
+      <p>Multi-task Natural Language Processing &bull; Powered by Claude AI</p>
+    </div>
+
+    <div class="task-tabs" id="task-tabs"></div>
+
+    <div class="panel" id="task-panel">
+      <div class="task-desc" id="task-desc"></div>
+      <label class="input-label">Input Text</label>
+      <textarea id="text-input" placeholder="Enter text here..."></textarea>
+      <div class="extras" id="extras-area"></div>
+      <button class="run-btn" id="run-btn" onclick="runTask()">&#9654; Run</button>
+      <div class="result-box" id="result-box" style="display:none;"></div>
+    </div>
+
+    <div id="history-panel" style="display:none;">
+      <div class="section-title">Recent Results</div>
+      <div id="history-list"></div>
+    </div>
+  </div>
+
+  <script src="static/config.js"></script>
+  <script src="tasks/sentiment.js"></script>
+  <script src="tasks/ner.js"></script>
+  <script src="tasks/summarization.js"></script>
+  <script src="tasks/classification.js"></script>
+  <script src="tasks/qa.js"></script>
+  <script src="tasks/translation.js"></script>
+  <script src="utils/api.js"></script>
+  <script src="utils/history.js"></script>
+  <script src="static/app.js"></script>
+</body>
+</html>
